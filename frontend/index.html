@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f5f7fb">
+    <title>Keitaro — управление кампаниями</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-theme="dark">
+    <div class="app-shell">
+        <aside class="sidebar" aria-label="Основная навигация">
+            <a class="brand" href="#" aria-label="Keitaro Manager, главная">
+                <span class="brand-mark">K</span>
+                <span class="brand-copy"><strong>Keitaro</strong><small>Campaign manager</small></span>
+            </a>
+
+            <div class="nav-caption">РАБОЧАЯ ОБЛАСТЬ</div>
+            <nav class="side-nav">
+                <button class="tab-btn active" data-tab="manage" type="button"><span class="nav-icon">▦</span>Кампании</button>
+                <button class="tab-btn" data-tab="create" type="button"><span class="nav-icon">＋</span>Создать кампанию</button>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <span class="connection-dot"></span>
+                <span><strong>Keitaro API</strong><small>Справочники и данные в реальном времени</small></span>
+            </div>
+        </aside>
+
+        <main class="main-area">
+            <header class="topbar">
+                <div class="breadcrumbs"><span>Рабочая область</span><span class="crumb-separator">/</span><strong id="pageBreadcrumb">Кампании</strong></div>
+                <div class="topbar-meta"><span class="live-indicator"><i></i>Подключено к Keitaro</span><button id="themeToggle" class="theme-toggle" type="button" aria-label="Переключить тему" title="Переключить тему"><span aria-hidden="true">☼</span><span class="theme-toggle-label">Светлая тема</span></button></div>
+            </header>
+
+            <section id="manage" class="tab-content active page-content" aria-labelledby="manageTitle">
+                <div class="page-heading">
+                    <div>
+                        <div class="eyebrow">УПРАВЛЕНИЕ</div>
+                        <h1 id="manageTitle">Кампании</h1>
+                        <p>Просматривайте потоки и управляйте офферами в кампаниях Keitaro.</p>
+                    </div>
+                    <button class="btn btn-primary heading-action" type="button" data-open-tab="create"><span aria-hidden="true">＋</span> Новая кампания</button>
+                </div>
+
+                <div class="toolbar">
+                    <label class="search-box" for="campaignSearch"><span aria-hidden="true">⌕</span><input id="campaignSearch" type="search" placeholder="Поиск по названию, alias или ID" aria-label="Поиск кампаний"><kbd>Ctrl K</kbd></label>
+                    <div class="toolbar-end"><span id="campaignCount" class="campaign-count" aria-live="polite">Загрузка…</span><button id="refreshCampaigns" class="btn btn-quiet" type="button"><span aria-hidden="true">↻</span> Обновить</button></div>
+                </div>
+
+                <div id="campaignsList" class="campaigns-list" aria-live="polite"></div>
+            </section>
+
+            <section id="create" class="tab-content page-content" aria-labelledby="createTitle">
+                <div class="page-heading">
+                    <div>
+                        <div class="eyebrow">НОВАЯ КАМПАНИЯ</div>
+                        <h1 id="createTitle">Создание кампании</h1>
+                        <p>Укажите параметры кампании. Справочники загружаются напрямую из Keitaro.</p>
+                    </div>
+                </div>
+
+                <div class="create-layout">
+                    <form id="createForm" class="form-card">
+                        <div class="card-heading"><div><h2>Основные параметры</h2><p>Все поля со звёздочкой обязательны</p></div><span class="step-label">ШАГ 1 ИЗ 1</span></div>
+
+                        <div class="form-grid">
+                            <div class="form-group form-span-2">
+                                <label for="campaignName">Название <span class="required">*</span></label>
+                                <input type="text" id="campaignName" placeholder="Например, spring_sale_de" maxlength="120" required>
+                                <small>К названию автоматически добавится префикс тестовой кампании.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="geoCode">Гео <span class="required">*</span></label>
+                                <select id="geoCode" required></select>
+                                <small>Для потока редиректа на Google</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="offerId">Основной оффер <span class="required">*</span></label>
+                                <small class="offer-search-help">Можно выбрать из полного списка. Чтобы найти по ID: введите номер в поле ниже, затем выберите найденный оффер.</small>
+                                <input type="search" id="offerIdSearch" placeholder="1. Введите ID, например 18001" inputmode="numeric" autocomplete="off" aria-label="Шаг 1. Введите ID для поиска оффера">
+                                <select id="offerId" required></select>
+                                <small>Выбранный оффер будет добавлен во второй поток.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="domainId">Домен</label>
+                                <select id="domainId"></select>
+                                <small id="domainHint">Домен из аккаунта Keitaro</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="groupId">Группа кампаний <span class="required">*</span></label>
+                                <select id="groupId" required></select>
+                                <small id="groupHint">Группа из аккаунта Keitaro</small>
+                            </div>
+                            <div class="form-group form-span-2">
+                                <label for="trafficSourceId">Источник трафика <span class="required">*</span></label>
+                                <select id="trafficSourceId" required></select>
+                                <small id="trafficSourceHint">Источник, настроенный в аккаунте Keitaro.</small>
+                                <button id="retryDefaults" class="inline-retry" type="button" hidden>↻ Обновить справочники</button>
+                            </div>
+                        </div>
+
+                        <div class="form-footer"><span class="secure-note"><span aria-hidden="true">●</span> Создаётся в вашем аккаунте Keitaro</span><button type="submit" class="btn btn-primary"><span>Создать кампанию</span><span aria-hidden="true">→</span></button></div>
+                        <div id="createResult" class="result-box" hidden></div>
+                    </form>
+
+                    <aside class="setup-aside">
+                        <div class="preview-card">
+                            <div class="preview-top"><span class="preview-icon">◎</span><span class="preview-caption">СТРУКТУРА КАМПАНИИ</span></div>
+                            <h3>Два потока, одна кампания</h3>
+                            <p>Порядок важен: Keitaro проверяет условия сверху вниз.</p>
+                            <div class="flow-step"><span class="step-number">01</span><div><strong>Редирект по гео</strong><small>Выбранная страна → Google</small></div><span class="flow-lock">⌁</span></div>
+                            <div class="flow-connector"></div>
+                            <div class="flow-step"><span class="step-number step-number-green">02</span><div><strong>Основной оффер</strong><small>Поток без фильтров</small></div><span class="flow-arrow">↗</span></div>
+                        </div>
+                        <div class="tip-card"><span class="tip-mark">i</span><p><strong>Перед созданием</strong><br>Проверьте гео, оффер, группу и источник. Эти значения будут отправлены в Keitaro.</p></div>
+                    </aside>
+                </div>
+            </section>
+        </main>
+
+        <div id="alerts" class="alerts-container" aria-live="polite" aria-atomic="true"></div>
+    </div>
+    <script src="app.js?v=offer-search-steps-20261125"></script>
+</body>
+</html>
